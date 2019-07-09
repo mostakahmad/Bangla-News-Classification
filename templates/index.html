@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News Classifier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-lg-12 text-center">
+            <h1>Bangla News Classifier</h1>
+            <p>Input your news below to classify </p>
+            <form id="news">
+                <div class="form-group">
+                    <label for="news_input">Input News:</label>
+                    <textarea class="form-control" rows="8" id="news_input"></textarea>
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+            <div id='message'>Initial text</div>
+
+        </div>
+    </div>
+
+
+</div>
+</body>
+
+<script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        }
+    });
+</script>
+
+{% csrf_token %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#news").submit(function (event) {
+            $.ajax({
+                type: "POST",
+                url: "/classify/",
+                data: {
+                    'news': $('#news_input').val() // from form
+                },
+                success: function (response) {
+                    $('#message').html("<h2>News Submitted!  response : "+response+"</h2>")
+                }
+            });
+            return false; //<---- move it here
+        });
+
+    });
+</script>
+
+</html>
